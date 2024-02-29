@@ -17,7 +17,6 @@ const personaSchema = new mongoose.Schema({
   correoElectronico: {
     type: String,
     required: true,
-    unique: true
   },
   edad: {
     type: Number,
@@ -40,8 +39,8 @@ const personaSchema = new mongoose.Schema({
     default: ''
   },
   qrURL: {
-    type: String, // Almacenar la URL de Cloudinary como una cadena de texto
-    default: '' // Puedes establecer un valor predeterminado si lo deseas
+    type: String,
+    default: '' 
   }
 });
 
