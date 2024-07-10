@@ -1,0 +1,115 @@
+[
+    {
+      "nombre": "Hipertensión",
+      "descripcion": "Condición caracterizada por la presión arterial alta.",
+      "medicamentos": [
+        {
+          "nombre": "Losartán",
+          "descripcion": "Medicamento utilizado para tratar la hipertensión."
+        },
+        {
+          "nombre": "Enalapril",
+          "descripcion": "Inhibidor de la ECA usado para tratar la hipertensión."
+        }
+      ]
+    },
+    {
+      "nombre": "Diabetes",
+      "descripcion": "Enfermedad crónica que afecta la forma en que el cuerpo procesa el azúcar en sangre.",
+      "medicamentos": [
+        {
+          "nombre": "Metformina",
+          "descripcion": "Medicamento utilizado para el tratamiento de la diabetes tipo 2."
+        },
+        {
+          "nombre": "Insulina",
+          "descripcion": "Hormona utilizada para controlar los niveles de azúcar en sangre."
+        }
+      ]
+    },
+    {
+      "nombre": "Asma",
+      "descripcion": "Enfermedad inflamatoria crónica de las vías respiratorias.",
+      "medicamentos": [
+        {
+          "nombre": "Salbutamol",
+          "descripcion": "Broncodilatador utilizado para aliviar los síntomas del asma."
+        },
+        {
+          "nombre": "Budesonida",
+          "descripcion": "Corticosteroide inhalado utilizado para prevenir los síntomas del asma."
+        }
+      ]
+    },
+    {
+      "nombre": "Depresión",
+      "descripcion": "Trastorno mental caracterizado por una baja persistente en el estado de ánimo.",
+      "medicamentos": [
+        {
+          "nombre": "Fluoxetina",
+          "descripcion": "Antidepresivo utilizado para tratar la depresión."
+        },
+        {
+          "nombre": "Sertralina",
+          "descripcion": "Antidepresivo utilizado para tratar la depresión y los trastornos de ansiedad."
+        }
+      ]
+    },
+    {
+      "nombre": "Epilepsia",
+      "descripcion": "Trastorno del sistema nervioso central que provoca convulsiones.",
+      "medicamentos": [
+        {
+          "nombre": "Carbamazepina",
+          "descripcion": "Medicamento anticonvulsivo utilizado para tratar la epilepsia."
+        },
+        {
+          "nombre": "Valproato",
+          "descripcion": "Medicamento utilizado para tratar la epilepsia y los trastornos bipolares."
+        }
+      ]
+    },
+    {
+      "nombre": "Ansiedad",
+      "descripcion": "Trastorno mental caracterizado por sentimientos de preocupación y miedo.",
+      "medicamentos": [
+        {
+          "nombre": "Diazepam",
+          "descripcion": "Medicamento utilizado para tratar la ansiedad."
+        },
+        {
+          "nombre": "Alprazolam",
+          "descripcion": "Benzodiacepina utilizada para tratar los trastornos de ansiedad."
+        }
+      ]
+    },
+    {
+      "nombre": "Artritis",
+      "descripcion": "Inflamación de una o más articulaciones, causando dolor y rigidez.",
+      "medicamentos": [
+        {
+          "nombre": "Ibuprofeno",
+          "descripcion": "Anti-inflamatorio no esteroideo utilizado para aliviar el dolor y la inflamación."
+        },
+        {
+          "nombre": "Metotrexato",
+          "descripcion": "Medicamento utilizado para tratar la artritis reumatoide."
+        }
+      ]
+    },
+    {
+      "nombre": "Colesterol Alto",
+      "descripcion": "Condición en la que hay niveles elevados de colesterol en la sangre.",
+      "medicamentos": [
+        {
+          "nombre": "Atorvastatina",
+          "descripcion": "Estatina utilizada para reducir los niveles de colesterol."
+        },
+        {
+          "nombre": "Rosuvastatina",
+          "descripcion": "Medicamento utilizado para tratar el colesterol alto."
+        }
+      ]
+    }
+  ]
+  
