@@ -3,6 +3,8 @@ const bodegaController = require('../controller/bodegaController');
 const authenticateToken = require('../Middleware/authenticateToken');
 const router = express.Router();
 
+
+router.get('/total', authenticateToken, bodegaController.getTotalBodegas);
 router.post('/register', authenticateToken, bodegaController.createBodega);
 router.get('/', authenticateToken, bodegaController.getBodegas);
 router.get('/:id', authenticateToken, bodegaController.getBodegaById);

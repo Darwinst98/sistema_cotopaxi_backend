@@ -7,5 +7,6 @@ router.post('/register', authenticateToken, sitioSeguroController.createSitioSeg
 router.get('/', authenticateToken, sitioSeguroController.getSitioSeguros);
 router.put('/:id', authenticateToken, sitioSeguroController.updateSitioSeguro);
 router.delete('/:id', authenticateToken, sitioSeguroController.deleteSitioSeguro);
+router.get('/total', authenticateToken, sitioSeguroController.getTotalSitioSeguros);
 
 module.exports = router;

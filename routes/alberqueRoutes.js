@@ -1,11 +1,13 @@
 const express = require('express');
 const albergueController = require('../controller/albergueController');
 const authenticateToken = require('../Middleware/authenticateToken');
+const { esAdminGeneral } = require('../Middleware/authMiddleware');
 const router = express.Router();
 
-router.post('/register', authenticateToken, albergueController.createAlbergue);
+router.post('/register', esAdminGeneral, authenticateToken, albergueController.createAlbergue);
 router.get('/', authenticateToken, albergueController.getAlbergues);
 router.put('/:id', authenticateToken, albergueController.updateAlbergue);
-router.delete('/:id', authenticateToken, albergueController.deleteAlbergue);
+router.delete('/:id', esAdminGeneral, authenticateToken, albergueController.deleteAlbergue);
+router.get('/total', authenticateToken, albergueController.getTotalAlbergues);
 
 module.exports = router;

@@ -8,6 +8,7 @@ const Domicilio = require('./Domicilio');
 const Enfermedad = require('./Enfermedad');
 const Medicamento = require('./Medicamento');
 
+
 module.exports = {
   Usuario,
   Ciudadano,

@@ -1,9 +1,9 @@
 const Joi = require("@hapi/joi");
 const SitioSeguro = require("../model/SitioSeguro");
+const { esAdminGeneral } = require('../Middleware/authMiddleware');
 
 const schemaRegisters = Joi.object({
   nombre: Joi.string().min(2).max(100).required(),
-  descripcion: Joi.string().min(2).max(200),
   cordenadas_x: Joi.number().required(),
   cordenadas_y: Joi.number().required()
 });
@@ -17,15 +17,8 @@ exports.getSitioSeguros = async (req, res) => {
   }
 };
 
-exports.createSitioSeguro = async (req, res) => {
+exports.createSitioSeguro = [esAdminGeneral, async (req, res) => {
   try {
-
-    if (req.user.rol !== 'admin_general') {
-      return res.status(403).json({
-          success: false,
-          message: "No tienes permisos para crear un sitio seguro. Solo el admin_general puede realizar esta acción."
-      });
-  }
 
 
     const { error, value } = schemaRegisters.validate(req.body);
@@ -50,9 +43,9 @@ exports.createSitioSeguro = async (req, res) => {
       error: error.message,
     });
   }
-};
+}];
 
-exports.updateSitioSeguro = async (req, res) => {
+exports.updateSitioSeguro = [esAdminGeneral, async (req, res) => {
   try {
 
     const { error, value } = schemaRegisters.validate(req.body);
@@ -82,17 +75,11 @@ exports.updateSitioSeguro = async (req, res) => {
       error: error.message,
     });
   }
-};
+}];
 
 // Controlador para eliminar un sitio seguro
-exports.deleteSitioSeguro = async (req, res) => {
+exports.deleteSitioSeguro = [esAdminGeneral, async (req, res) => {
   try {
-    if (req.user.rol !== 'admin_general') {
-      return res.status(403).json({
-        success: false,
-        message: "No tienes permisos para eliminar un sitio seguro. Solo el admin_general puede realizar esta acción."
-      });
-    }
 
     const sitioSeguroEliminado = await SitioSeguro.findByIdAndDelete(req.params.id);
 
@@ -114,5 +101,22 @@ exports.deleteSitioSeguro = async (req, res) => {
       error: error.message,
     });
   }
-};
+}];
 
+
+//Controlador para traer el numero total de sitios seguros
+exports.getTotalSitioSeguros = async (req, res) => {
+  try {
+    const totalSitioSeguros = await SitioSeguro.countDocuments();
+    res.json({
+      success: true,
+      totalSitioSeguros: totalSitioSeguros
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "¡Ups! Algo salió mal al intentar obtener el total de sitios seguros. Por favor, inténtalo nuevamente más tarde.",
+      error: error.message,
+    });
+  }
+};
