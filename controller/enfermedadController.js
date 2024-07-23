@@ -2,6 +2,8 @@ const Enfermedad = require('../model/Enfermedad');
 const Medicamento = require('../model/Medicamento');
 const Joi = require('@hapi/joi');
 
+const xlsx = require('xlsx');
+
 // Esquemas de validación
 const enfermedadSchema = Joi.object({
   nombre: Joi.string().required(),
@@ -132,4 +134,136 @@ exports.obtenerTodasEnfermedades = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Error fetching enfermedades', error });
   }
+  };
+
+
+  exports.procesarExcel = async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No se ha subido ningún archivo' });
+      }
+  
+      const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      const data = xlsx.utils.sheet_to_json(sheet);
+  
+      const resultados = await Promise.all(data.map(async (row) => {
+        try {
+          // Validar los datos de la enfermedad
+          const { error: enfermedadError } = enfermedadSchema.validate({
+            nombre: row.nombre,
+            descripcion: row.descripcion,
+            medicamentos: [{
+              nombre: row.medicamentoNombre,
+              codigo: row.medicamentoCodigo,
+              descripcion: row.medicamentoDescripcion,
+              fechaVencimiento: row.medicamentoFechaVencimiento
+            }]
+          });
+  
+          if (enfermedadError) {
+            return { error: `Fila inválida: ${enfermedadError.details[0].message}` };
+          }
+  
+          // Crear o actualizar el medicamento
+          const medicamento = await Medicamento.findOneAndUpdate(
+            { codigo: row.medicamentoCodigo },
+            {
+              nombre: row.medicamentoNombre,
+              descripcion: row.medicamentoDescripcion,
+              fechaVencimiento: row.medicamentoFechaVencimiento
+            },
+            { upsert: true, new: true }
+          );
+  
+          // Crear o actualizar la enfermedad
+          const enfermedad = await Enfermedad.findOneAndUpdate(
+            { nombre: row.nombre },
+            {
+              $set: { descripcion: row.descripcion },
+              $addToSet: { medicamentos: medicamento._id }
+            },
+            { upsert: true, new: true }
+          );
+  
+          return { success: `Enfermedad ${enfermedad.nombre} procesada con éxito` };
+        } catch (error) {
+          return { error: `Error procesando fila: ${error.message}` };
+        }
+      }));
+  
+      res.json({
+        message: 'Archivo Excel procesado',
+        resultados
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Error procesando el archivo Excel', error: error.message });
+    }
+  };
+
+
+  exports.procesarExcel = async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No se ha subido ningún archivo' });
+      }
+  
+      const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      const data = xlsx.utils.sheet_to_json(sheet);
+  
+      const resultados = await Promise.all(data.map(async (row) => {
+        try {
+          // Validar los datos de la enfermedad
+          const { error: enfermedadError } = enfermedadSchema.validate({
+            nombre: row.nombre,
+            descripcion: row.descripcion,
+            medicamentos: [{
+              nombre: row.medicamentoNombre,
+              codigo: row.medicamentoCodigo,
+              descripcion: row.medicamentoDescripcion,
+              fechaVencimiento: row.medicamentoFechaVencimiento
+            }]
+          });
+  
+          if (enfermedadError) {
+            return { error: `Fila inválida: ${enfermedadError.details[0].message}` };
+          }
+  
+          // Crear o actualizar el medicamento
+          const medicamento = await Medicamento.findOneAndUpdate(
+            { codigo: row.medicamentoCodigo },
+            {
+              nombre: row.medicamentoNombre,
+              descripcion: row.medicamentoDescripcion,
+              fechaVencimiento: row.medicamentoFechaVencimiento
+            },
+            { upsert: true, new: true }
+          );
+  
+          // Crear o actualizar la enfermedad
+          const enfermedad = await Enfermedad.findOneAndUpdate(
+            { nombre: row.nombre },
+            {
+              $set: { descripcion: row.descripcion },
+              $addToSet: { medicamentos: medicamento._id }
+            },
+            { upsert: true, new: true }
+          );
+  
+          return { success: `Enfermedad ${enfermedad.nombre} procesada con éxito` };
+        } catch (error) {
+          return { error: `Error procesando fila: ${error.message}` };
+        }
+      }));
+  
+      res.json({
+        message: 'Archivo Excel procesado',
+        resultados
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Error procesando el archivo Excel', error: error.message });
+    }
   };
