@@ -8,13 +8,18 @@ const enfermedadSchema = Joi.object({
   descripcion: Joi.string().required(),
   medicamentos: Joi.array().items(Joi.object({
     nombre: Joi.string().required(),
-    descripcion: Joi.string()
+    codigo: Joi.string().required(),
+    descripcion: Joi.string(),
+    fechaVencimiento: Joi.date()
+
   })).required()
 });
 
 const medicamentoSchema = Joi.object({
   nombre: Joi.string().required(),
-  descripcion: Joi.string()
+  codigo: Joi.string().required(),
+  descripcion: Joi.string(),
+  fechaVencimiento: Joi.date()
 });
 
 exports.crearEnfermedad = async (req, res) => {

@@ -74,6 +74,7 @@ exports.createCiudadano = async (req, res) => {
       telefono: value.telefono,
       enfermedades: value.enfermedades ? value.enfermedades.split(',') : [],
       domicilio: domicilioSeleccionado._id,
+      salvaldo: false,
       qrURL: value.qrURL,
       medicamentos: medicamentosSeleccionados // Guardar ObjectIds de los medicamentos seleccionados
     });
@@ -114,6 +115,7 @@ exports.createCiudadano = async (req, res) => {
               nombre: medicamento.nombre,
               stockMin: 1,
               stockMax: 10,
+              codigo: medicamento.codigo,
               descripcion: medicamento.descripcion,
               fechaVencimiento: medicamento.fechaVencimiento,
               bodega: bodegaSeleccionada._id

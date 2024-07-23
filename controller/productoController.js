@@ -6,6 +6,7 @@ const schemaRegisters = Joi.object({
   nombre: Joi.string().required(),
   stockMin: Joi.number().required().min(0),
   stockMax: Joi.number().required().min(Joi.ref('stockMin')),
+  codigo: Joi.string().required(),
   descripcion: Joi.string().optional(),
   fechaVencimiento: Joi.date().optional(),
   bodega: Joi.string().required()

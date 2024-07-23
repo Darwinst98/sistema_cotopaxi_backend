@@ -5,6 +5,7 @@ const productoSchema = new Schema({
   nombre: { type: String, required: true },
   stockMin: { type: Number, required: true, default: 0 },
   stockMax: { type: Number, required: true, default: 0 },
+  codigo: { type: String, required: true },
   descripcion: { type: String, required: false },
   fechaVencimiento: { type: Date, required: false },
   bodega: { type: Schema.Types.ObjectId, ref: 'Bodega', required: true } 
