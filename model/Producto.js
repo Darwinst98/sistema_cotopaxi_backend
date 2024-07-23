@@ -3,8 +3,10 @@ const { Schema } = mongoose;
 
 const productoSchema = new Schema({
   nombre: { type: String, required: true },
-  stock: { type: Number, required: true, default: 0 },
+  stockMin: { type: Number, required: true, default: 0 },
+  stockMax: { type: Number, required: true, default: 0 },
   descripcion: { type: String, required: false },
+  fechaVencimiento: { type: Date, required: false },
   bodega: { type: Schema.Types.ObjectId, ref: 'Bodega', required: true } 
 }, {
   timestamps: true

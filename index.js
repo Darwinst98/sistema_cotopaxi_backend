@@ -17,6 +17,7 @@ const bodegaRoutes = require('./routes/bodegaRoutes');
 const sitioSeguroRoutes = require('./routes/sitioSeguroRoutes');
 const productoRoutes = require('./routes/productoRoutes');
 const domicilioRoutes = require('./routes/domicilioRoutes');
+const enfermedadRoutes = require('./routes/enfermedadRoutes');
 
 app.use('/api/usuario', usuarioRoutes);
 app.use('/api/albergue', albergueRoutes);
@@ -25,7 +26,7 @@ app.use('/api/bodega', bodegaRoutes);
 app.use('/api/sitioSeguro', sitioSeguroRoutes);
 app.use('/api/productos', productoRoutes);
 app.use('/api/domicilios', domicilioRoutes);
-
+app.use('/api/enfermedad', enfermedadRoutes);
 
 port = process.env.PORT || 5000;
 app.listen(port, () => {

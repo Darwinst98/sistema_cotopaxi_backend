@@ -5,7 +5,8 @@ const Domicilio = require('../model/Domicilio');
 const Enfermedad = require('../model/Enfermedad');
 const Medicamento = require('../model/Medicamento');
 const Bodega = require('../model/Bodega');
-const Producto = require('../model/Producto'); // Asegúrate de requerir el modelo Producto
+const Producto = require('../model/Producto');
+
 
 const schemaRegisters = Joi.object({
   nombre: Joi.string().min(2).max(100).required(),
@@ -15,25 +16,21 @@ const schemaRegisters = Joi.object({
   email: Joi.string().min(4).max(100).required().email(),
   telefono: Joi.string().min(10).max(10).required(),
   enfermedades: Joi.string().optional(),
+  medicamentos: Joi.alternatives().try(Joi.array().items(Joi.string()), Joi.string()).optional(),
   qrURL: Joi.string().required(),
   domicilio: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required()
 });
 
-// Función para calcular la distancia entre dos puntos en coordenadas cartesianas
-function calcularDistancia(x1, y1, x2, y2) {
-  return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-}
-
 exports.createCiudadano = async (req, res) => {
   try {
+    // Convertir medicamentos a un array si no lo es
+    if (typeof req.body.medicamentos === 'string') {
+      req.body.medicamentos = [req.body.medicamentos];
+    }
+
     const { error, value } = schemaRegisters.validate(req.body);
     if (error) {
       return res.status(400).json({ error: error.details[0].message });
-    }
-
-    const existeEmail = await Ciudadano.findOne({ email: value.email });
-    if (existeEmail) {
-      return res.status(400).json({ error: "El email ya está registrado" });
     }
 
     const existeCedula = await Ciudadano.findOne({ cedula: value.cedula });
@@ -41,29 +38,11 @@ exports.createCiudadano = async (req, res) => {
       return res.status(400).json({ error: "La cédula ya está registrada" });
     }
 
-    const existeTelefono = await Ciudadano.findOne({ telefono: value.telefono });
-    if (existeTelefono) {
-      return res.status(400).json({ error: "El telefono ya está registrado" });
-    }
-
     const domicilioSeleccionado = await Domicilio.findById(value.domicilio);
     if (!domicilioSeleccionado) {
       return res.status(400).json({ error: "Domicilio no encontrado" });
     }
-
-    const albergues = await Albergue.find();
-    const distancias = albergues.map(albergue => ({
-      albergue,
-      distancia: calcularDistancia(
-        albergue.cordenadas_x, albergue.cordenadas_y,
-        domicilioSeleccionado.cordenadas_x, domicilioSeleccionado.cordenadas_y
-      )
-    }));
-
-    const albergueMasProximo = distancias.reduce((prev, curr) => 
-      prev.distancia < curr.distancia ? prev : curr
-    ).albergue;
-
+    
     let medicamentos = [];
     if (value.enfermedades) {
       const enfermedades = value.enfermedades.split(',');
@@ -75,6 +54,17 @@ exports.createCiudadano = async (req, res) => {
       }
     }
 
+    // Convertir nombres de medicamentos a ObjectIds
+    const medicamentosSeleccionados = [];
+    for (let medicamentoNombre of value.medicamentos) {
+      const medicamento = await Medicamento.findOne({ nombre: medicamentoNombre });
+      if (medicamento) {
+        medicamentosSeleccionados.push(medicamento._id);
+      } else {
+        return res.status(400).json({ error: `Medicamento ${medicamentoNombre} no encontrado` });
+      }
+    }
+
     const nuevoCiudadano = new Ciudadano({
       nombre: value.nombre,
       apellido: value.apellido,
@@ -83,62 +73,76 @@ exports.createCiudadano = async (req, res) => {
       email: value.email,
       telefono: value.telefono,
       enfermedades: value.enfermedades ? value.enfermedades.split(',') : [],
-      albergue: albergueMasProximo._id,
       domicilio: domicilioSeleccionado._id,
       qrURL: value.qrURL,
-      medicamentos
+      medicamentos: medicamentosSeleccionados // Guardar ObjectIds de los medicamentos seleccionados
     });
 
     await nuevoCiudadano.save();
 
-    // Actualizar el albergue con el nuevo ciudadano
-    await Albergue.findByIdAndUpdate(
-      albergueMasProximo._id,
-      { $push: { ciudadanos: nuevoCiudadano._id } },
-      { new: true, useFindAndModify: false }
-    );
+    // Distribuir medicamentos proporcionalmente entre las bodegas
+    const bodegas = await Bodega.find({ categoria: 'Medicamentos' });
 
-    // Asignar medicamentos a la bodega del albergue
-    for (let medicamento of medicamentos) {
-      const bodegas = await Bodega.find({ _id: { $in: albergueMasProximo.bodegas } });
+    for (let medicamentoId of medicamentosSeleccionados) {
+      const medicamento = await Medicamento.findById(medicamentoId);
+      if (medicamento) {
+        // Buscar la bodega que tenga menos cantidad de este medicamento
+        let bodegaSeleccionada = null;
+        let menorCantidad = Infinity;
 
-      let bodegaMedicamentos = bodegas.find(b => b.categoria === 'Medicamentos');
+        for (let bodega of bodegas) {
+          const productoExistente = await Producto.findOne({ nombre: medicamento.nombre, bodega: bodega._id });
+          const cantidadActual = productoExistente ? productoExistente.stockMin : 0;
 
-        
-        let producto = await Producto.findOne({ nombre: medicamento.nombre, bodega: bodegaMedicamentos._id });
-        if (producto) {
-          producto.stock += 1;
-        } else {
-          producto = new Producto({
-            nombre: medicamento.nombre,
-            stock: 1,
-            descripcion: medicamento.descripcion,
-            bodega: bodegaMedicamentos._id
-          });
+          if (cantidadActual < menorCantidad) {
+            menorCantidad = cantidadActual;
+            bodegaSeleccionada = bodega;
+          }
         }
 
-        await producto.save();
-        if (!bodegaMedicamentos.productos.includes(producto._id)) {
-          bodegaMedicamentos.productos.push(producto._id);
-          await bodegaMedicamentos.save();
+        if (bodegaSeleccionada) {
+          let producto = await Producto.findOne({ nombre: medicamento.nombre, bodega: bodegaSeleccionada._id });
+          if (producto) {
+            if (producto.stockMax > producto.stockMin) {
+              producto.stockMin += 1;
+              producto.stockMax += 1;
+            } else {
+              console.log(`No se puede aumentar el stock de ${medicamento.nombre} en la bodega ${bodegaSeleccionada._id}. Ya está en su máximo.`);
+            }
+          } else {
+            producto = new Producto({
+              nombre: medicamento.nombre,
+              stockMin: 1,
+              stockMax: 10,
+              descripcion: medicamento.descripcion,
+              fechaVencimiento: medicamento.fechaVencimiento,
+              bodega: bodegaSeleccionada._id
+            });
+          }
+          await producto.save();
+
+          if (!bodegaSeleccionada.productos.includes(producto._id)) {
+            bodegaSeleccionada.productos.push(producto._id);
+            await bodegaSeleccionada.save();
+          }
         }
+      }
     }
 
     const responseObject = {
       success: true,
       ciudadano: nuevoCiudadano,
     };
-
     res.status(201).json(responseObject);
   } catch (error) {
     res.status(500).json({
       success: false,
-      message:
-        "¡Ups! Algo salió mal al intentar registrarte. Por favor, inténtalo nuevamente más tarde.",
+      message: "¡Ups! Algo salió mal al intentar registrarte. Por favor, inténtalo nuevamente más tarde.",
       error: error.message,
     });
   }
 };
+
 
 
 
@@ -202,6 +206,50 @@ exports.updateCiudadano = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "¡Ups! Algo salió mal al intentar actualizar el ciudadano. Por favor, inténtalo nuevamente más tarde.",
+      error: error.message,
+    });
+  }
+};
+
+//Controlador para traer el numero total de ciudadanos
+exports.getTotalCiudadanos = async (req, res) => {
+  try {
+    const totalCiudadanos = await Ciudadano.countDocuments();
+    res.json({
+      success: true,
+      totalCiudadanos: totalCiudadanos
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "¡Ups! Algo salió mal al intentar obtener el total de ciudadanos. Por favor, inténtalo nuevamente más tarde.",
+      error: error.message,
+    });
+  }
+};
+
+
+exports.getCiudadanosDeTodosLosAlbergues = async (req, res) => {
+  try {
+    const ciudadanos = await Ciudadano.find()
+      .populate({
+        path: 'medicamentos',
+        select: 'nombre' // Esto seleccionará solo el nombre del medicamento
+      })
+      .populate('domicilio', 'nombre') // Opcional: si quieres incluir la dirección del domicilio
+      .lean(); // Usamos lean() en lugar de toObject() para mayor eficiencia
+
+    // Transformamos los datos para que los medicamentos sean un array de nombres
+    const ciudadanosFormateados = ciudadanos.map(ciudadano => ({
+      ...ciudadano,
+      medicamentos: ciudadano.medicamentos.map(med => med.nombre)
+    }));
+
+    res.json(ciudadanosFormateados);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "¡Ups! Algo salió mal al intentar obtener los ciudadanos. Por favor, inténtalo nuevamente más tarde.",
       error: error.message,
     });
   }

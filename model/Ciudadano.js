@@ -6,13 +6,15 @@ const ciudadanoSchema = new Schema({
   apellido: { type: String, required: true },
   edad: { type: Number, required: true },
   cedula: { type: String, required: true, unique: true },
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true },
   telefono: { type: String, required: true },
   enfermedades: { type: [String], required: true },
+  medicamentos: { type: [String], required: true },
   qrURL: { type: String, required: true },
+  salvaldo: { type: Boolean, required: true, default: false },
   medicamentos: [{ type: Schema.Types.ObjectId, ref: 'Medicamento' }],
   domicilio: { type: Schema.Types.ObjectId, ref: 'Domicilio', required: true },
-  albergue: { type: Schema.Types.ObjectId, ref: 'Albergue', required: true },
+  albergue: { type: Schema.Types.ObjectId, ref: 'Albergue'},
 }, {
   timestamps: true
 });

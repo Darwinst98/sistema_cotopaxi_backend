@@ -3,8 +3,7 @@ const { Schema } = mongoose;
 
 const domicilioSchema = new Schema({
   nombre: { type: String, required: true },
-  cordenadas_x: { type: Number, required: true },
-  cordenadas_y: { type: Number, required: true }
+  zonaDeRiesgo: { type: Boolean, required: true }
 }, {
   timestamps: true
 });

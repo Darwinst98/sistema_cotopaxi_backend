@@ -2,64 +2,63 @@ const Bodega = require('../model/Bodega');
 const Producto = require('../model/Producto');
 const Joi = require('@hapi/joi');
 
-// Validación del producto
 const schemaRegisters = Joi.object({
-    nombre: Joi.string().required(),
-    stock: Joi.number().required(),
-    descripcion: Joi.string().optional(),
-    bodega: Joi.string().required() // Este campo debe ser una cadena representando un ObjectId válido
-  });
+  nombre: Joi.string().required(),
+  stockMin: Joi.number().required().min(0),
+  stockMax: Joi.number().required().min(Joi.ref('stockMin')),
+  descripcion: Joi.string().optional(),
+  fechaVencimiento: Joi.date().optional(),
+  bodega: Joi.string().required()
+});
 
-// Crear un nuevo producto
 exports.createProducto = async (req, res) => {
-  try {
-      const { error, value } = schemaRegisters.validate(req.body);
-      if (error) {
-          return res.status(400).json({ error: error.details[0].message });
-      }
+try {
+    const { error, value } = schemaRegisters.validate(req.body);
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+    }
 
-      const { bodega: bodegaId, stock } = value;
+    const { bodega: bodegaId, stockMax } = value;
 
-      // Obtener la bodega
-      const bodega = await Bodega.findById(bodegaId);
-      if (!bodega) {
-          return res.status(404).json({ error: 'Bodega no encontrada' });
-      }
+    // Obtener la bodega
+    const bodega = await Bodega.findById(bodegaId);
+    if (!bodega) {
+        return res.status(404).json({ error: 'Bodega no encontrada' });
+    }
 
-      // Calcular el stock total actual de la bodega
-      const productosEnBodega = await Producto.find({ bodega: bodegaId });
-      const stockTotalActual = productosEnBodega.reduce((total, producto) => total + producto.stock, 0);
+    // Calcular el stock total actual de la bodega
+    const productosEnBodega = await Producto.find({ bodega: bodegaId });
+    const stockTotalActual = productosEnBodega.reduce((total, producto) => total + producto.stockMax, 0);
 
-      // Verificar si el nuevo stock excederá la capacidad
-      if (stockTotalActual + stock > bodega.capacidad) {
-          return res.status(400).json({ error: 'El stock excede la capacidad de la bodega' });
-      }
+    // Verificar si el nuevo stock máximo excederá la capacidad
+    if (stockTotalActual + stockMax > bodega.capacidad) {
+        return res.status(400).json({ error: 'El stock máximo excede la capacidad de la bodega' });
+    }
 
-      const nuevoProducto = new Producto(value);
+    const nuevoProducto = new Producto(value);
 
-      await Bodega.findByIdAndUpdate(
-        nuevoProducto.bodega,
-        { $push: { productos: nuevoProducto._id } },
-        { new: true, useFindAndModify: false }
-      );
+    await Bodega.findByIdAndUpdate(
+      nuevoProducto.bodega,
+      { $push: { productos: nuevoProducto._id } },
+      { new: true, useFindAndModify: false }
+    );
 
-      await nuevoProducto.save();
-      const populatedProducto = await nuevoProducto.populate('bodega', 'nombre');
-      const responseObject = {
-          success: true,
-          producto: populatedProducto,
-      };
+    await nuevoProducto.save();
+    const populatedProducto = await nuevoProducto.populate('bodega', 'nombre');
+    const responseObject = {
+        success: true,
+        producto: populatedProducto,
+    };
 
-      res.status(201).json(responseObject);
-  } catch (error) {
-      res.status(500).json({
-          success: false,
-          message: "¡Ups! Algo salió mal al intentar registrar el producto. Por favor, inténtalo nuevamente más tarde.",
-          error: error.message,
-      });
-  }
+    res.status(201).json(responseObject);
+} catch (error) {
+    res.status(500).json({
+        success: false,
+        message: "¡Ups! Algo salió mal al intentar registrar el producto. Por favor, inténtalo nuevamente más tarde.",
+        error: error.message,
+    });
+}
 };
-
 exports.getProductos = async (req, res) => {
     try { 
       const productos = await Producto.find();

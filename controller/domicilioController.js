@@ -3,19 +3,12 @@ const Domicilio = require('../model/Domicilio');
 
 const schemaRegisters = Joi.object({
   nombre: Joi.string().required(),
-  cordenadas_x: Joi.number().required(),
-  cordenadas_y: Joi.number().required()
+  zonaDeRiesgo: Joi.boolean().required()
 });
 
-exports.createDomicilio = async (req, res) => {
+exports.createDomicilio =  async (req, res) => {
   try {
 
-    if (req.user.rol !== 'admin_general') {
-        return res.status(403).json({
-          success: false,
-          message: "No tienes permisos para crear un domicilio. Solo el admin_general puede realizar esta acción."
-        });
-      }
 
     const { error, value } = schemaRegisters.validate(req.body);
     if (error) {
@@ -52,7 +45,7 @@ exports.getDomicilios = async (req, res) => {
     }
 };
 
-exports.updateDomicilio = async (req, res) => {
+exports.updateDomicilio =  async (req, res) => {
   try {
     const { error, value } = schemaRegisters.validate(req.body);
     if (error) {
@@ -82,14 +75,8 @@ exports.updateDomicilio = async (req, res) => {
   }
 };
 
-exports.deleteDomicilio = async (req, res) => {
+exports.deleteDomicilio =  async (req, res) => {
   try {
-    if (req.user.rol !== 'admin_general') {
-        return res.status(403).json({
-          success: false,
-          message: "No tienes permisos para eliminar un albergue. Solo el admin_general puede realizar esta acción."
-        });
-      }
 
 
     const domicilio = await Domicilio.findByIdAndDelete(req.params.id);

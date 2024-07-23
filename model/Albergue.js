@@ -3,7 +3,6 @@ const { Schema } = mongoose;
 
 const albergueSchema = new Schema({
   nombre: { type: String, required: true },
-  descripcion: { type: String, required: false },
   cordenadas_x: { type: Number, required: true },
   cordenadas_y: { type: Number, required: true },
   capacidadCiudadanos: { type: Number, required: true },
