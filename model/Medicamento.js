@@ -4,7 +4,6 @@ const { Schema } = mongoose;
 const medicamentoSchema = new Schema({
   nombre: { type: String, required: true },
   codigo: { type: String, required: true},
-  fechaVencimiento: { type: Date, required: false },
   descripcion: { type: String }
 }, {
   timestamps: true

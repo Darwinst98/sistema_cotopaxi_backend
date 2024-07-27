@@ -6,14 +6,12 @@
       {
         "nombre": "Losartán",
         "descripcion": "Medicamento utilizado para tratar la hipertensión.",
-        "codigo": "HTA001",
-        "fechaVencimiento": "2025-12-31"
+        "codigo": "HTA001"
       },
       {
         "nombre": "Enalapril",
         "descripcion": "Inhibidor de la ECA usado para tratar la hipertensión.",
-        "codigo": "HTA002",
-        "fechaVencimiento": "2024-06-30"
+        "codigo": "HTA002"
       }
     ]
   },
@@ -24,14 +22,12 @@
       {
         "nombre": "Metformina",
         "descripcion": "Medicamento utilizado para el tratamiento de la diabetes tipo 2.",
-        "codigo": "DBT001",
-        "fechaVencimiento": "2025-01-15"
+        "codigo": "DBT001"
       },
       {
         "nombre": "Insulina",
         "descripcion": "Hormona utilizada para controlar los niveles de azúcar en sangre.",
-        "codigo": "DBT002",
-        "fechaVencimiento": "2023-11-01"
+        "codigo": "DBT002"
       }
     ]
   },
@@ -42,14 +38,12 @@
       {
         "nombre": "Salbutamol",
         "descripcion": "Broncodilatador utilizado para aliviar los síntomas del asma.",
-        "codigo": "ASM001",
-        "fechaVencimiento": "2024-04-20"
+        "codigo": "ASM001"
       },
       {
         "nombre": "Budesonida",
         "descripcion": "Corticosteroide inhalado utilizado para prevenir los síntomas del asma.",
-        "codigo": "ASM002",
-        "fechaVencimiento": "2024-10-10"
+        "codigo": "ASM002"
       }
     ]
   },
@@ -60,14 +54,12 @@
       {
         "nombre": "Fluoxetina",
         "descripcion": "Antidepresivo utilizado para tratar la depresión.",
-        "codigo": "DEP001",
-        "fechaVencimiento": "2025-08-25"
+        "codigo": "DEP001"
       },
       {
         "nombre": "Sertralina",
         "descripcion": "Antidepresivo utilizado para tratar la depresión y los trastornos de ansiedad.",
-        "codigo": "DEP002",
-        "fechaVencimiento": "2024-05-15"
+        "codigo": "DEP002"
       }
     ]
   },
@@ -78,14 +70,13 @@
       {
         "nombre": "Carbamazepina",
         "descripcion": "Medicamento anticonvulsivo utilizado para tratar la epilepsia.",
-        "codigo": "EPI001",
-        "fechaVencimiento": "2025-02-10"
+        "codigo": "EPI001"
+        
       },
       {
         "nombre": "Valproato",
         "descripcion": "Medicamento utilizado para tratar la epilepsia y los trastornos bipolares.",
-        "codigo": "EPI002",
-        "fechaVencimiento": "2024-09-05"
+        "codigo": "EPI002"
       }
     ]
   },
@@ -96,14 +87,12 @@
       {
         "nombre": "Diazepam",
         "descripcion": "Medicamento utilizado para tratar la ansiedad.",
-        "codigo": "ANS001",
-        "fechaVencimiento": "2025-12-31"
+        "codigo": "ANS001"
       },
       {
         "nombre": "Alprazolam",
         "descripcion": "Benzodiacepina utilizada para tratar los trastornos de ansiedad.",
-        "codigo": "ANS002",
-        "fechaVencimiento": "2024-06-30"
+        "codigo": "ANS002"
       }
     ]
   },
@@ -114,14 +103,12 @@
       {
         "nombre": "Ibuprofeno",
         "descripcion": "Anti-inflamatorio no esteroideo utilizado para aliviar el dolor y la inflamación.",
-        "codigo": "ART001",
-        "fechaVencimiento": "2025-01-15"
+        "codigo": "ART001"
       },
       {
         "nombre": "Metotrexato",
         "descripcion": "Medicamento utilizado para tratar la artritis reumatoide.",
-        "codigo": "ART002",
-        "fechaVencimiento": "2023-11-01"
+        "codigo": "ART002"
       }
     ]
   },
@@ -132,14 +119,12 @@
       {
         "nombre": "Atorvastatina",
         "descripcion": "Estatina utilizada para reducir los niveles de colesterol.",
-        "codigo": "COL001",
-        "fechaVencimiento": "2024-04-20"
+        "codigo": "COL001"
       },
       {
         "nombre": "Rosuvastatina",
         "descripcion": "Medicamento utilizado para tratar el colesterol alto.",
-        "codigo": "COL002",
-        "fechaVencimiento": "2024-10-10"
+        "codigo": "COL002"
       }
     ]
   },
@@ -150,14 +135,12 @@
       {
         "nombre": "Omeprazol",
         "descripcion": "Medicamento utilizado para tratar la gastritis.",
-        "codigo": "GST001",
-        "fechaVencimiento": "2025-07-15"
+        "codigo": "GST001"
       },
       {
         "nombre": "Ranitidina",
         "descripcion": "Medicamento utilizado para reducir la producción de ácido en el estómago.",
-        "codigo": "GST002",
-        "fechaVencimiento": "2024-11-25"
+        "codigo": "GST002"
       }
     ]
   },
@@ -168,14 +151,12 @@
       {
         "nombre": "Sumatriptán",
         "descripcion": "Medicamento utilizado para tratar las migrañas.",
-        "codigo": "MGR001",
-        "fechaVencimiento": "2025-03-30"
+        "codigo": "MGR001"
       },
       {
         "nombre": "Naproxeno",
         "descripcion": "Anti-inflamatorio no esteroideo utilizado para aliviar el dolor de la migraña.",
-        "codigo": "MGR002",
-        "fechaVencimiento": "2024-09-20"
+        "codigo": "MGR002"
       }
     ]
   },
@@ -186,14 +167,12 @@
       {
         "nombre": "Loratadina",
         "descripcion": "Antihistamínico utilizado para aliviar los síntomas de la alergia.",
-        "codigo": "ALG001",
-        "fechaVencimiento": "2025-05-25"
+        "codigo": "ALG001"
       },
       {
         "nombre": "Cetirizina",
         "descripcion": "Antihistamínico utilizado para tratar los síntomas de la alergia.",
-        "codigo": "ALG002",
-        "fechaVencimiento": "2024-12-15"
+        "codigo": "ALG002"
       }
     ]
   },
@@ -204,14 +183,12 @@
       {
         "nombre": "Ciprofloxacino",
         "descripcion": "Antibiótico utilizado para tratar las infecciones urinarias.",
-        "codigo": "INF001",
-        "fechaVencimiento": "2025-06-10"
+        "codigo": "INF001"
       },
       {
         "nombre": "Nitrofurantoína",
         "descripcion": "Antibiótico utilizado para tratar y prevenir infecciones urinarias.",
-        "codigo": "INF002",
-        "fechaVencimiento": "2024-10-30"
+        "codigo": "INF002"
       }
     ]
   },
@@ -222,14 +199,12 @@
       {
         "nombre": "Oseltamivir",
         "descripcion": "Antiviral utilizado para tratar y prevenir la gripe.",
-        "codigo": "GRP001",
-        "fechaVencimiento": "2025-12-05"
+        "codigo": "GRP001"
       },
       {
         "nombre": "Paracetamol",
         "descripcion": "Medicamento utilizado para aliviar el dolor y reducir la fiebre.",
-        "codigo": "GRP002",
-        "fechaVencimiento": "2024-07-30"
+        "codigo": "GRP002"
       }
     ]
   }

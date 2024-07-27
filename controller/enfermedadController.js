@@ -12,7 +12,6 @@ const enfermedadSchema = Joi.object({
     nombre: Joi.string().required(),
     codigo: Joi.string().required(),
     descripcion: Joi.string(),
-    fechaVencimiento: Joi.date()
 
   })).required()
 });
@@ -20,8 +19,7 @@ const enfermedadSchema = Joi.object({
 const medicamentoSchema = Joi.object({
   nombre: Joi.string().required(),
   codigo: Joi.string().required(),
-  descripcion: Joi.string(),
-  fechaVencimiento: Joi.date()
+  descripcion: Joi.string()
 });
 
 exports.crearEnfermedad = async (req, res) => {
@@ -157,8 +155,7 @@ exports.obtenerTodasEnfermedades = async (req, res) => {
             medicamentos: [{
               nombre: row.medicamentoNombre,
               codigo: row.medicamentoCodigo,
-              descripcion: row.medicamentoDescripcion,
-              fechaVencimiento: row.medicamentoFechaVencimiento
+              descripcion: row.medicamentoDescripcion
             }]
           });
   
@@ -171,8 +168,7 @@ exports.obtenerTodasEnfermedades = async (req, res) => {
             { codigo: row.medicamentoCodigo },
             {
               nombre: row.medicamentoNombre,
-              descripcion: row.medicamentoDescripcion,
-              fechaVencimiento: row.medicamentoFechaVencimiento
+              descripcion: row.medicamentoDescripcion
             },
             { upsert: true, new: true }
           );
