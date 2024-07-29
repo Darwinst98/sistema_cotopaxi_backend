@@ -9,5 +9,8 @@ router.get('/', authenticateToken, albergueController.getAlbergues);
 router.put('/:id', authenticateToken, albergueController.updateAlbergue);
 router.delete('/:id', esAdminGeneral, authenticateToken, albergueController.deleteAlbergue);
 router.get('/total', authenticateToken, albergueController.getTotalAlbergues);
+router.get('/:id/qr', authenticateToken, albergueController.getAlbergueIdQR);
+router.get('/:id', albergueController.getAlbergueQrView);
+router.post('/:id/sumarse', albergueController.sumarCiudadanoAlbergueQR);
 
 module.exports = router;

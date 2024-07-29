@@ -4,6 +4,7 @@ const authenticateToken = require('../Middleware/authenticateToken');
 const router = express.Router();
 
 router.post('/register', ciudadanoController.createCiudadano);
+router.post('/registerUser', authenticateToken, ciudadanoController.createCiudadanoUser);
 router.get('/:id/ciudadanos', authenticateToken, ciudadanoController.getCiudadanos);
 router.delete('/:id', authenticateToken, ciudadanoController.deleteCiudadano);
 router.put('/:id', authenticateToken, ciudadanoController.updateCiudadano);
