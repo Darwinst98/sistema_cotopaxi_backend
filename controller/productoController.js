@@ -12,6 +12,89 @@ const schemaRegisters = Joi.object({
   bodega: Joi.string().required()
 });
 
+const transferSchema = Joi.object({
+  bodegaOrigenId: Joi.string().required(),
+  productos: Joi.array().items(Joi.object({
+    producto: Joi.string().required(),
+    cantidad: Joi.number().required().min(1)
+  })).required(),
+  bodegaDestinoId: Joi.string().required()
+});
+
+exports.transferirProductos = async (req, res) => {
+  const { error } = transferSchema.validate(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
+
+  const { bodegaOrigenId, productos, bodegaDestinoId } = req.body;
+
+  try {
+    // Verificar que ambas bodegas existen
+    const bodegaOrigen = await Bodega.findById(bodegaOrigenId);
+    if (!bodegaOrigen) return res.status(404).send('Bodega de origen no encontrada.');
+
+    const bodegaDestino = await Bodega.findById(bodegaDestinoId);
+    if (!bodegaDestino) return res.status(404).send('Bodega de destino no encontrada.');
+
+    // Verificar que ambas bodegas pertenecen a la misma categoría
+    if (bodegaOrigen.categoria !== bodegaDestino.categoria) {
+      return res.status(400).send('Las bodegas no pertenecen a la misma categoría.');
+    }
+
+    // Procesar cada producto
+    for (const item of productos) {
+      const { producto, cantidad } = item;
+
+      // Verificar que el producto existe en la bodega de origen y que tiene suficiente cantidad
+      const productoOrigen = await Producto.findOne({ _id: producto, bodega: bodegaOrigenId });
+      if (!productoOrigen) return res.status(404).send(`Producto con ID ${producto} no encontrado en la bodega de origen.`);
+      if (productoOrigen.stockMin < cantidad) return res.status(400).send(`No hay suficiente cantidad del producto con ID ${producto} en la bodega de origen.`);
+
+      // Verificar si el producto ya existe en la bodega de destino
+      const productoDestino = await Producto.findOne({ _id: producto, bodega: bodegaDestinoId });
+
+      if (productoDestino) {
+        // Si el producto ya existe en la bodega de destino, aumentar la cantidad
+        productoDestino.stockMin += cantidad;
+        await productoDestino.save();
+      } else {
+        // Si el producto no existe en la bodega de destino, crear uno nuevo
+        const newProducto = new Producto({
+          nombre: productoOrigen.nombre,
+          stockMin: cantidad,
+          stockMax: productoOrigen.stockMax,
+          codigo: productoOrigen.codigo,
+          descripcion: productoOrigen.descripcion,
+          fechaVencimiento: productoOrigen.fechaVencimiento,
+          bodega: bodegaDestinoId
+        });
+        await newProducto.save();
+
+        // Agregar el nuevo producto a la lista de productos de la bodega de destino
+        bodegaDestino.productos.push(newProducto._id);
+      }
+
+      // Reducir la cantidad en la bodega de origen
+      productoOrigen.stockMin -= cantidad;
+      if (productoOrigen.stockMin === 0) {
+        // Quitar el producto de la lista de productos de la bodega de origen si el stock es cero
+        bodegaOrigen.productos.pull(productoOrigen._id);
+        await productoOrigen.remove();
+      } else {
+        await productoOrigen.save();
+      }
+    }
+
+    // Guardar cambios en las bodegas
+    await bodegaOrigen.save();
+    await bodegaDestino.save();
+
+    res.send('Productos transferidos con éxito.');
+  } catch (err) {
+    res.status(500).send('Error del servidor.');
+  }
+};
+
+
 exports.createProducto = async (req, res) => {
 try {
     const { error, value } = schemaRegisters.validate(req.body);

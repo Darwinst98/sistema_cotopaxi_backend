@@ -27,7 +27,7 @@ app.use('/api/sitioSeguro', sitioSeguroRoutes);
 app.use('/api/productos', productoRoutes);
 app.use('/api/domicilios', domicilioRoutes);
 app.use('/api/enfermedad', enfermedadRoutes);
-
+    
 port = process.env.PORT || 5000;
 app.listen(port, () => {
   console.log(`Servidor escuchando en el puerto ${port}`);

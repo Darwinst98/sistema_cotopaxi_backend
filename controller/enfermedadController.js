@@ -18,7 +18,7 @@ const enfermedadSchema = Joi.object({
 
 const medicamentoSchema = Joi.object({
   nombre: Joi.string().required(),
-  codigo: Joi.string().required(),
+  codigo: Joi.string().required(),  
   descripcion: Joi.string()
 });
 
