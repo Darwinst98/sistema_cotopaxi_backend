@@ -9,7 +9,7 @@ const bodegaSchema = new Schema({
   productos: [{ type: Schema.Types.ObjectId, ref: 'Producto' }] 
 }, {
   timestamps: true
-});
+}); 
 
 // Añadimos un método virtual para calcular el porcentaje de ocupación
 bodegaSchema.virtual('porcentajeOcupacion').get(function() {

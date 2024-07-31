@@ -211,9 +211,7 @@ exports.getTotalAlbergues = async (req, res) => {
 
 exports.getAlbergueIdQR = async (req, res) => {
   try {
-    const url = `${req.protocol}://${req.get("host")}/api/albergue/${
-      req.params.id
-    }`;
+    const url = `${req.protocol}://${req.get("host")}/api/albergue/${req.params.id}`;
 
     const qrCode = await QRCode.toDataURL(url);
     res.send({ qrCode });
@@ -228,6 +226,8 @@ exports.getAlbergueQrView = async (req, res) => {
     if (!albergue) {
       return res.status(404).send("Albergue no encontrado");
     }
+     
+
     res.send(`
       <!DOCTYPE html>
 <html lang="es">
@@ -352,6 +352,8 @@ exports.getAlbergueQrView = async (req, res) => {
 </body>
 </html>
     `);
+
+    
   } catch (error) {
     res.status(500).send({ message: error.message });
   }

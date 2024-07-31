@@ -26,15 +26,14 @@ exports.transferirProductos = async (req, res) => {
   if (error) return res.status(400).send(error.details[0].message);
 
   const { bodegaOrigenId, productos, bodegaDestinoId } = req.body;
-
   try {
     // Verificar que ambas bodegas existen
     const bodegaOrigen = await Bodega.findById(bodegaOrigenId);
     if (!bodegaOrigen) return res.status(404).send('Bodega de origen no encontrada.');
-
+    
     const bodegaDestino = await Bodega.findById(bodegaDestinoId);
     if (!bodegaDestino) return res.status(404).send('Bodega de destino no encontrada.');
-
+    
     // Verificar que ambas bodegas pertenecen a la misma categoría
     if (bodegaOrigen.categoria !== bodegaDestino.categoria) {
       return res.status(400).send('Las bodegas no pertenecen a la misma categoría.');
@@ -43,15 +42,16 @@ exports.transferirProductos = async (req, res) => {
     // Procesar cada producto
     for (const item of productos) {
       const { producto, cantidad } = item;
-
+    
       // Verificar que el producto existe en la bodega de origen y que tiene suficiente cantidad
       const productoOrigen = await Producto.findOne({ _id: producto, bodega: bodegaOrigenId });
       if (!productoOrigen) return res.status(404).send(`Producto con ID ${producto} no encontrado en la bodega de origen.`);
       if (productoOrigen.stockMin < cantidad) return res.status(400).send(`No hay suficiente cantidad del producto con ID ${producto} en la bodega de origen.`);
-
+    
       // Verificar si el producto ya existe en la bodega de destino
-      const productoDestino = await Producto.findOne({ _id: producto, bodega: bodegaDestinoId });
-
+      const productoDestino = await Producto.findOne({ _id: producto, bodega: bodegaDestinoId, nombre: productoOrigen.nombre,
+        codigo: productoOrigen.codigo });
+    
       if (productoDestino) {
         // Si el producto ya existe en la bodega de destino, aumentar la cantidad
         productoDestino.stockMin += cantidad;
@@ -68,25 +68,27 @@ exports.transferirProductos = async (req, res) => {
           bodega: bodegaDestinoId
         });
         await newProducto.save();
-
+    
         // Agregar el nuevo producto a la lista de productos de la bodega de destino
         bodegaDestino.productos.push(newProducto._id);
       }
-
+    
       // Reducir la cantidad en la bodega de origen
       productoOrigen.stockMin -= cantidad;
+    
       if (productoOrigen.stockMin === 0) {
-        // Quitar el producto de la lista de productos de la bodega de origen si el stock es cero
-        bodegaOrigen.productos.pull(productoOrigen._id);
-        await productoOrigen.remove();
+        // Si el stock llega a cero, eliminar el producto de la bodega de origen
+        await Producto.findByIdAndDelete(productoOrigen._id);
+        // Remover el producto de la lista de productos de la bodega de origen
+        bodegaOrigen.productos = bodegaOrigen.productos.filter(p => p.toString() !== productoOrigen._id.toString());
       } else {
         await productoOrigen.save();
       }
     }
-
-    // Guardar cambios en las bodegas
+    
     await bodegaOrigen.save();
     await bodegaDestino.save();
+    
 
     res.send('Productos transferidos con éxito.');
   } catch (err) {
@@ -143,6 +145,7 @@ try {
     });
 }
 };
+
 exports.getProductos = async (req, res) => {
     try { 
       const productos = await Producto.find();
@@ -210,5 +213,73 @@ exports.deleteProducto = async (req, res) => {
         message: "¡Ups! Algo salió mal al intentar eliminar el producto. Por favor, inténtalo nuevamente más tarde.",
         error: error.message,
       });
+    }
+  };
+
+
+  exports.actualizarProductoPorQR = async (req, res) => {
+    try {
+      const { qrData, bodegaId } = req.body;
+  
+      let qrText;
+      if (typeof qrData === 'object' && qrData.text) {
+        qrText = qrData.text;
+      } else if (typeof qrData === 'string') {
+        qrText = qrData;
+      } else {
+        throw new Error('Formato de datos QR inválido');
+      }
+  
+      const [categoria, nombre, codigo, fechaVencimiento] = qrText.split('/');
+  
+      // Buscar la bodega
+      const bodega = await Bodega.findById(bodegaId);
+      if (!bodega) {
+        return res.status(404).json({ status: 'error', message: 'Bodega no encontrada' });
+      }
+  
+      // Verificar si la categoría coincide
+      if (bodega.categoria !== categoria) {
+        return res.status(400).json({ status: 'error', message: 'La categoría del producto no coincide con la de la bodega' });
+      }
+  
+      // Buscar el producto en la bodega
+      let producto = await Producto.findOne({ nombre, codigo, bodega: bodegaId });
+  
+      if (bodega.categoria === 'Medicamentos') {
+        if (producto) {
+          // Actualizar producto existente sin cambiar el stock
+          producto.fechaVencimiento = new Date(fechaVencimiento);
+          await producto.save();
+          return res.status(200).json({ status: 'success', message: 'Producto de Medicamentos actualizado exitosamente', producto });
+        } else {
+          return res.status(400).json({ status: 'error', message: 'No se pueden crear nuevos productos en la bodega de Medicamentos' });
+        }
+      } else {
+        if (producto) {
+          // Actualizar producto existente y aumentar stock
+          producto.fechaVencimiento = new Date(fechaVencimiento);
+          producto.stockMin = producto.stockMin + 1;
+          await producto.save();
+          return res.status(200).json({ status: 'success', message: 'Producto actualizado y stock incrementado', producto });
+        } else {
+          // Crear nuevo producto con stock inicial de 1
+          producto = new Producto({
+            nombre,
+            codigo,
+            fechaVencimiento: new Date(fechaVencimiento),
+            bodega: bodegaId,
+            stock: 1,
+            stockMin: 1,
+            stockMax: 100,
+            descripcion: 'Nuevo producto escaneado por QR'
+          });
+          await producto.save();
+          return res.status(201).json({ status: 'success', message: 'Nuevo producto creado con stock inicial', producto });
+        }
+      }
+    } catch (error) {
+      console.error('Error al actualizar/crear producto por QR:', error);
+      res.status(500).json({ status: 'error', message: error.message || 'Error al procesar la solicitud' });
     }
   };
