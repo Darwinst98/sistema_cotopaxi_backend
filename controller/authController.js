@@ -6,8 +6,22 @@ const Ciudadano = require('../model/Ciudadano');
 
 exports.loginUsuario = async (req, res) => {
     try {
-        const { cedula, password } = req.body;
-        const usuario = await Usuario.findOne({ cedula });
+        const { cedula, nombre, password } = req.body;
+        let usuario;
+
+        // Determina si es login web (cédula + password) o móvil (nombre + password)
+        if (cedula) {
+            // Login web
+            usuario = await Usuario.findOne({ cedula });
+        } else if (nombre) {
+            // Login móvil
+            usuario = await Usuario.findOne({ nombre });
+        } else {
+            return res.status(400).json({
+                success: false,
+                message: 'Datos de login incompletos o inválidos.'
+            });
+        }
 
         if (usuario) {
             const isPasswordValid = await bcrypt.compare(password, usuario.password);
@@ -18,7 +32,14 @@ exports.loginUsuario = async (req, res) => {
                     success: true,
                     token,
                     usuario: {
-                        rol: usuario.rol
+                        rol: usuario.rol,
+                        nombre: usuario.nombre,
+                        apellido: usuario.apellido,
+                        cedula: usuario.cedula,
+                        email: usuario.email,
+                        telefono: usuario.telefono,
+                        cedula: usuario.cedula,
+                        albergue: usuario.albergue
                     }
                 };
                 return res.status(200).json(responseObject);
@@ -40,10 +61,10 @@ exports.loginUsuario = async (req, res) => {
 
 exports.loginCiudadano = async (req, res) => {
     try {
-        const { cedula } = req.body;
-        const ciudadano = await Ciudadano.findOne({ cedula });
+        const { nombre, cedula } = req.body;
+        const ciudadano = await Ciudadano.findOne({ cedula, nombre });
 
-        if (ciudadano && compare(cedula, ciudadano.cedula)) {
+        if (ciudadano && ciudadano.cedula === cedula && ciudadano.nombre === nombre) {
             const token = jwt.sign({ id: ciudadano.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
             const responseObject = {

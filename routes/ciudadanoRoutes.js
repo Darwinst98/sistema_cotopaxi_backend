@@ -1,8 +1,10 @@
 const express = require('express');
 const ciudadanoController = require('../controller/ciudadanoController');
+const authController = require('../controller/authController');
 const authenticateToken = require('../Middleware/authenticateToken');
 const router = express.Router();
 
+router.post('/login', authController.loginCiudadano);
 router.post('/register', ciudadanoController.createCiudadano);
 router.post('/registerUser', authenticateToken, ciudadanoController.createCiudadanoUser);
 router.get('/:id/ciudadanos', authenticateToken, ciudadanoController.getCiudadanos);
