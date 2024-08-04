@@ -62,7 +62,10 @@ exports.loginUsuario = async (req, res) => {
 exports.loginCiudadano = async (req, res) => {
     try {
         const { nombre, cedula } = req.body;
-        const ciudadano = await Ciudadano.findOne({ cedula, nombre });
+        const ciudadano = await Ciudadano.findOne({ cedula, nombre }).populate({
+            path: "albergue",
+            select: "nombre", // Esto seleccionará solo el nombre del medicamento
+          }).lean();
 
         if (ciudadano && ciudadano.cedula === cedula && ciudadano.nombre === nombre) {
             const token = jwt.sign({ id: ciudadano.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
