@@ -12,5 +12,6 @@ router.delete('/:id', authenticateToken, ciudadanoController.deleteCiudadano);
 router.put('/:id', authenticateToken, ciudadanoController.updateCiudadano);
 router.get('/total', authenticateToken, ciudadanoController.getTotalCiudadanos);
 router.get('/ciudadanosDeTodosLosAlbergues', authenticateToken, ciudadanoController.getCiudadanosDeTodosLosAlbergues);
+router.post('/scanQrCode', authenticateToken, ciudadanoController.scanQrCode);
 
 module.exports = router;

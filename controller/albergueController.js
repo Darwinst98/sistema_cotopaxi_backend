@@ -211,10 +211,10 @@ exports.getTotalAlbergues = async (req, res) => {
 
 exports.getAlbergueIdQR = async (req, res) => {
   try {
-    const url = `${req.protocol}://${req.get("host")}/api/albergue/${req.params.id}`;
+    const url = `${req.protocol}://localhost:5000/api/albergue/${req.params.id}`;
 
     const qrCode = await QRCode.toDataURL(url);
-    res.send({ qrCode });
+    res.send({ qrCode, url });
   } catch (error) {
     res.status(500).send({ message: error.message });
   }

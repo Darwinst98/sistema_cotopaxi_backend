@@ -19,7 +19,7 @@ const schemaRegisters = Joi.object({
   medicamentos: Joi.alternatives()
     .try(Joi.array().items(Joi.string()), Joi.string())
     .optional(),
-  qrURL: Joi.string().required(),
+  qrURL: Joi.string().optional(),
   domicilio: Joi.string()
     .regex(/^[0-9a-fA-F]{24}$/)
     .required(),
@@ -401,7 +401,6 @@ exports.updateCiudadano = async (req, res) => {
   }
 };
 
-//Controlador para traer el numero total de ciudadanos
 exports.getTotalCiudadanos = async (req, res) => {
   try {
     const totalCiudadanos = await Ciudadano.countDocuments();
@@ -424,13 +423,12 @@ exports.getCiudadanosDeTodosLosAlbergues = async (req, res) => {
     const ciudadanos = await Ciudadano.find()
       .populate({
         path: "medicamentos",
-        select: "nombre", // Esto seleccionará solo el nombre del medicamento
+        select: "nombre",
       })
-      .populate("domicilio", "nombre") // Opcional: si quieres incluir la dirección del domicilio
-      .populate("albergue", "nombre") //
-      .lean(); // Usamos lean() en lugar de toObject() para mayor eficiencia
+      .populate("domicilio", "nombre") 
+      .populate("albergue", "nombre") 
+      .lean();
 
-    // Transformamos los datos para que los medicamentos sean un array de nombres
     const ciudadanosFormateados = ciudadanos.map((ciudadano) => ({
       ...ciudadano,
       medicamentos: ciudadano.medicamentos.map((med) => med.nombre),
@@ -444,5 +442,41 @@ exports.getCiudadanosDeTodosLosAlbergues = async (req, res) => {
         "¡Ups! Algo salió mal al intentar obtener los ciudadanos. Por favor, inténtalo nuevamente más tarde.",
       error: error.message,
     });
+  }
+};
+
+exports.scanQrCode = async (req, res) => {
+  try {
+    const { ciudadanoData } = req.body;
+    const adminId = req.user.id; 
+
+    const { error } = schemaRegisters.validate(ciudadanoData);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    const admin = await Usuario.findById(adminId).populate('albergue');
+    if (!admin || !admin.albergue) {
+      return res.status(400).json({ error: "Admin not associated with an albergue" });
+    }
+
+    let ciudadano = await Ciudadano.findOne({ cedula: ciudadanoData.cedula });
+
+    if (ciudadano) {
+      ciudadano.albergue = admin.albergue._id;
+      await ciudadano.save();
+    } else {
+      ciudadano = new Ciudadano({
+        ...ciudadanoData,
+        albergue: admin.albergue._id,
+        salvaldo: true
+      });
+      await ciudadano.save();
+    }
+
+    res.json({ message: "Citizen successfully updated/added to albergue", ciudadano });
+  } catch (error) {
+    console.log('Server error:', error);
+    res.status(400).json({ error: error.message });
   }
 };
