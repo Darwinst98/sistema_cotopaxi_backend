@@ -1,11 +1,11 @@
 const express = require('express');
-const connectDB = require('./connection/db'); // Ajusta la ruta si es necesario
+const connectDB = require('./connection/db'); // primera vez se comenta
 const models = require('./model');
 const app = express();
 const dotenv = require('dotenv');
 dotenv.config();
 const cors = require('cors');
-connectDB();
+connectDB(); // primera vez se comenta
 
 app.use(express.json());
 app.use(cors())
@@ -33,6 +33,8 @@ app.listen(port, () => {
   console.log(`Servidor escuchando en el puerto ${port}`);
 });
 
+
+// primera vez se comenta
 // const mongoose = require('mongoose');
 // const Enfermedad = require('./model/Enfermedad');  // Asegúrate de que la ruta al modelo sea correcta
 // const Medicamento = require('./model/Medicamento');
