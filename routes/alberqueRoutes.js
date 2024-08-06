@@ -6,6 +6,7 @@ const router = express.Router();
 
 router.post('/register', esAdminGeneral, authenticateToken, albergueController.createAlbergue);
 router.get('/', authenticateToken, albergueController.getAlbergues);
+router.get('/movil', albergueController.getAlberguesMovil);
 router.put('/:id', authenticateToken, albergueController.updateAlbergue);
 router.delete('/:id', esAdminGeneral, authenticateToken, albergueController.deleteAlbergue);
 router.get('/total', authenticateToken, albergueController.getTotalAlbergues);

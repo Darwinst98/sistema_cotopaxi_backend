@@ -20,6 +20,7 @@ const schemaRegisters = Joi.object({
     .try(Joi.array().items(Joi.string()), Joi.string())
     .optional(),
   qrURL: Joi.string().optional(),
+  imgPerfil: Joi.string().optional(),
   domicilio: Joi.string()
     .regex(/^[0-9a-fA-F]{24}$/)
     .required(),
@@ -166,6 +167,33 @@ exports.createCiudadano = async (req, res) => {
   }
 };
 
+// Controlador para actualizar la imagen de perfil
+exports.updateProfileImage = async (req, res) => {
+  const { cedula, imgPerfil } = req.body;
+
+  console.log("Recibí una solicitud de actualización de ProfileImage con cédula:", cedula, "e imgPerfil:", imgPerfil);
+
+  if (!cedula || !imgPerfil) {
+    return res.status(400).json({ message: 'Cédula e imagen de perfil son requeridos' });
+  }
+
+  try {
+    const ciudadano = await Ciudadano.findOneAndUpdate(
+      { cedula: cedula },
+      { imgPerfil: imgPerfil },
+      { new: true }
+    );
+
+    if (!ciudadano) {
+      return res.status(404).json({ message: 'Ciudadano no encontrado' });
+    }
+
+    res.status(200).json({ message: 'Imagen de perfil actualizada', ciudadano: ciudadano });
+  } catch (error) {
+    console.error("Error al actualizar la imagen del perfil:", error);
+    res.status(500).json({ message: 'Error interno del servidor', error: error.message });
+  }
+};
 
 exports.createCiudadanoUser = async (req, res) => {
   try {

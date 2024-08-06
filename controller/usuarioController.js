@@ -9,6 +9,7 @@ const schemaRegisters = Joi.object({
   cedula: Joi.string().min(10).max(10).required(),
   password: Joi.string().min(5).max(100).optional(),
   telefono: Joi.string().min(10).max(10).required(),
+  imgPerfil: Joi.string().optional(),
   rol: Joi.string()
     .valid("admin_general", "admin_zonal", "admin_farmaceutico")
     .required(),
@@ -82,6 +83,33 @@ exports.createUsuario = async (req, res) => {
       message: "¡Ups! Algo salió mal al intentar registrar el usuario. Por favor, inténtalo nuevamente más tarde.",
       error: error.message,
     });
+  }
+};
+
+exports.updateProfileImage = async (req, res) => {
+  const { cedula, imgPerfil } = req.body;
+
+  console.log("Recibí una solicitud de actualización de ProfileImage con cédula:", cedula, "e imgPerfil:", imgPerfil);
+
+  if (!cedula || !imgPerfil) {
+    return res.status(400).json({ message: 'Cédula e imagen de perfil son requeridos' });
+  }
+
+  try {
+    const usuario = await Usuario.findOneAndUpdate(
+      { cedula: cedula },
+      { imgPerfil: imgPerfil },
+      { new: true }
+    );
+
+    if (!usuario) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    res.status(200).json({ message: 'Imagen de perfil actualizada', usuario: usuario });
+  } catch (error) {
+    console.error("Error al actualizar la imagen del perfil:", error);
+    res.status(500).json({ message: 'Error interno del servidor', error: error.message });
   }
 };
 

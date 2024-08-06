@@ -8,6 +8,10 @@ const usuarioSchema = new Schema({
   cedula: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   telefono: { type: String, required: true, unique: true },
+  imgPerfil: {
+    type: String,
+    default: '' 
+  },
   rol: { type: String, enum: ['admin_general', 'admin_zonal', 'admin_farmaceutico'], required: true },
   albergue: { type: Schema.Types.ObjectId, ref: 'Albergue' },
 }, {

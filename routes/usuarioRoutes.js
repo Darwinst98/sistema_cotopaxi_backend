@@ -12,4 +12,5 @@ router.put('/:id', esAdminGeneral, authenticateToken, usuarioController.editUsua
 router.delete('/:id', esAdminGeneral, authenticateToken, usuarioController.deleteUsuario);
 router.post('/:id/asignar-albergue', esAdminGeneral, authenticateToken, usuarioController.asignarAlbergue);
 router.get('/:id/albergue', authenticateToken, usuarioController.getUsuariosPorAlbergue);
+router.post('/updateProfileImage', usuarioController.updateProfileImage);
 module.exports = router;

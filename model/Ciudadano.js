@@ -11,6 +11,10 @@ const ciudadanoSchema = new Schema({
   enfermedades: { type: [String], required: true },
   medicamentos: { type: [String], required: true },
   qrURL: { type: String, required: true },
+  imgPerfil: {
+    type: String,
+    default: '' 
+  },
   salvaldo: { type: Boolean, required: true, default: false },
   medicamentos: [{ type: Schema.Types.ObjectId, ref: 'Medicamento' }],
   domicilio: { type: Schema.Types.ObjectId, ref: 'Domicilio', required: true },

@@ -71,6 +71,15 @@ exports.getAlbergues = async (req, res) => {
   }
 };
 
+exports.getAlberguesMovil = async (req, res) => {
+  try {
+    const albergues = await Albergue.find().lean();
+    res.json(albergues);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Controlador para crear un nuevo albergue
 exports.createAlbergue = async (req, res) => {
   try {
