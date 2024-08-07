@@ -1,4 +1,4 @@
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const Joi = require("@hapi/joi");
 const Usuario = require('../model/Usuario');
 const Albergue = require('../model/Albergue');
