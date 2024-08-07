@@ -40,7 +40,7 @@ app.listen(port, () => {
 // const Medicamento = require('./model/Medicamento');
 // const fs = require('fs');
 
-// const mongoURI = 'mongodb+srv://wowsolowow:NLfA2ZOzxBv4fNr0@work.krljzub.mongodb.net/sistema_cotopaxi?retryWrites=true&w=majority&appName=Work';
+// const mongoURI = '.env';
 // async function insertarDatos() {
 //   try {
 //     await mongoose.connect(mongoURI);

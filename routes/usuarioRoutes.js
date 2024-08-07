@@ -6,6 +6,7 @@ const { esAdminGeneral } = require('../Middleware/authMiddleware');
 const router = express.Router();
 
 router.post('/register', usuarioController.createUsuario);
+router.post('/registerAdmin', usuarioController.createAdminGeneral);
 router.post('/login', authController.loginUsuario);
 router.get('/', esAdminGeneral, authenticateToken, usuarioController.getUsuarios);
 router.put('/:id', esAdminGeneral, authenticateToken, usuarioController.editUsuario);
