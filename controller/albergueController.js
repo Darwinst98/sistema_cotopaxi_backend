@@ -220,7 +220,7 @@ exports.getTotalAlbergues = async (req, res) => {
 
 exports.getAlbergueIdQR = async (req, res) => {
   try {
-    const url = `${req.protocol}://localhost:5000/api/albergue/${req.params.id}`;
+    const url = `${req.protocol}://sistema-cotopaxi-backend.onrender.com/api/albergue/${req.params.id}`;
 
     const qrCode = await QRCode.toDataURL(url);
     res.send({ qrCode, url });
@@ -352,7 +352,7 @@ exports.getAlbergueQrView = async (req, res) => {
         <button type="submit" class="form-button">Sumarse al Albergue</button>
       </form>
       <p id="message" class="message"></p>
-      <a href="http://localhost:5173/formulario" target="_blank" class="styled-link">
+      <a href="https://cotopaxi-477f5.web.app/formulario" target="_blank" class="styled-link">
     Si no estás registrado en el sistema, regístrate aquí
   </a>
 
