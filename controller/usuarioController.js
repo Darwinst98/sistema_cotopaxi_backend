@@ -19,6 +19,63 @@ const schemaRegisters = Joi.object({
   __v: Joi.number().optional()
 }).unknown(true); // Esto permite campos desconocidos
 
+const schemaAdminGeneral = Joi.object({
+  nombre: Joi.string().min(2).max(100).required(),
+  apellido: Joi.string().min(2).max(100).required(),
+  email: Joi.string().min(4).max(100).required().email(),
+  cedula: Joi.string().min(10).max(10).required(),
+  password: Joi.string().min(5).max(100).required(),
+  telefono: Joi.string().min(10).max(10).required(),
+  imgPerfil: Joi.string().optional(),
+  rol: Joi.string().valid("admin_general").required(),
+  createdAt: Joi.date().optional(),
+  updatedAt: Joi.date().optional(),
+  __v: Joi.number().optional()
+}).unknown(true);
+
+exports.createAdminGeneral = async (req, res) => {
+  try {
+    const { error, value } = schemaAdminGeneral.validate(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    const existeEmail = await Usuario.findOne({ email: value.email });
+    if (existeEmail) {
+      return res.status(400).json({ error: "El email ya está registrado" });
+    }
+
+    const existeCedula = await Usuario.findOne({ cedula: value.cedula });
+    if (existeCedula) {
+      return res.status(400).json({ error: "La cédula ya está registrada" });
+    }
+
+    const existeTelefono = await Usuario.findOne({ telefono: value.telefono });
+    if (existeTelefono) {
+      return res.status(400).json({ error: "El teléfono ya está registrado" });
+    }
+
+    const hashedPassword = await bcrypt.hash(value.password, 10);
+    const nuevoAdminGeneral = new Usuario({
+      ...value,
+      password: hashedPassword,
+      rol: "admin_general"
+    });
+
+    await nuevoAdminGeneral.save();
+
+    res.status(201).json({
+      success: true,
+      usuario: nuevoAdminGeneral,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "¡Ups! Algo salió mal al intentar registrar el administrador general. Por favor, inténtalo nuevamente más tarde.",
+      error: error.message,
+    });
+  }
+};
 
 exports.createUsuario = async (req, res) => {
   try {
