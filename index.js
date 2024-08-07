@@ -34,37 +34,37 @@ app.listen(port, () => {
 });
 
 
-// primera vez se comenta
-// const mongoose = require('mongoose');
-// const Enfermedad = require('./model/Enfermedad');  // Asegúrate de que la ruta al modelo sea correcta
-// const Medicamento = require('./model/Medicamento');
-// const fs = require('fs');
+  // primera vez se comenta
+  // const mongoose = require('mongoose');
+  // const Enfermedad = require('./model/Enfermedad');  // Asegúrate de que la ruta al modelo sea correcta
+  // const Medicamento = require('./model/Medicamento');
+  // const fs = require('fs');
 
-// const mongoURI = 'mongodb+srv://wowsolowow:NLfA2ZOzxBv4fNr0@work.krljzub.mongodb.net/sistema_cotopaxi?retryWrites=true&w=majority&appName=Work';
-// async function insertarDatos() {
-//   try {
-//     await mongoose.connect(mongoURI);
-//     console.log('Connected to MongoDB Atlas');
+  // const mongoURI = 'mongodb+srv://wowsolowow:NLfA2ZOzxBv4fNr0@work.krljzub.mongodb.net/sistema_cotopaxi?retryWrites=true&w=majority&appName=Work';
+  // async function insertarDatos() {
+  //   try {
+  //     await mongoose.connect(mongoURI);
+  //     console.log('Connected to MongoDB Atlas');
 
-//     const data = JSON.parse(fs.readFileSync('enfermedades.json', 'utf-8'));
+  //     const data = JSON.parse(fs.readFileSync('enfermedades.json', 'utf-8'));
 
-//     for (let enfermedadData of data) {
-//       const medicamentos = await Medicamento.insertMany(enfermedadData.medicamentos);
-//       const enfermedad = new Enfermedad({
-//         nombre: enfermedadData.nombre,
-//         descripcion: enfermedadData.descripcion,
-//         medicamentos: medicamentos.map(med => med._id)
-//       });
-//       await enfermedad.save();
-//     }
+  //     for (let enfermedadData of data) {
+  //       const medicamentos = await Medicamento.insertMany(enfermedadData.medicamentos);
+  //       const enfermedad = new Enfermedad({
+  //         nombre: enfermedadData.nombre,
+  //         descripcion: enfermedadData.descripcion,
+  //         medicamentos: medicamentos.map(med => med._id)
+  //       });
+  //       await enfermedad.save();
+  //     }
 
-//     console.log('Data successfully inserted');
-//   } catch (err) {
-//     console.error('Error inserting data:', err);
-//   } finally {
-//     await mongoose.disconnect();
-//     console.log('Disconnected from MongoDB Atlas');
-//   }
-// }
+  //     console.log('Data successfully inserted');
+  //   } catch (err) {
+  //     console.error('Error inserting data:', err);
+  //   } finally {
+  //     await mongoose.disconnect();
+  //     console.log('Disconnected from MongoDB Atlas');
+  //   }
+  // }
 
-// insertarDatos();
+  // insertarDatos();

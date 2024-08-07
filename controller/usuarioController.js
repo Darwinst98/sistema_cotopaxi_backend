@@ -20,6 +20,132 @@ const schemaRegisters = Joi.object({
 }).unknown(true); // Esto permite campos desconocidos
 
 
+const schemaAdminGeneral = Joi.object({
+  nombre: Joi.string().min(2).max(100).required(),
+  apellido: Joi.string().min(2).max(100).required(),
+  email: Joi.string().min(4).max(100).required().email(),
+  cedula: Joi.string().min(10).max(10).required(),
+  password: Joi.string().min(5).max(100).required(),
+  telefono: Joi.string().min(10).max(10).required(),
+  imgPerfil: Joi.string().optional(),
+  rol: Joi.string().valid("admin_general").required(),
+  createdAt: Joi.date().optional(),
+  updatedAt: Joi.date().optional(),
+  __v: Joi.number().optional()
+}).unknown(true);
+
+exports.createAdminGeneral = async (req, res) => {
+  try {
+    const { error, value } = schemaAdminGeneral.validate(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    const existeEmail = await Usuario.findOne({ email: value.email });
+    if (existeEmail) {
+      return res.status(400).json({ error: "El email ya está registrado" });
+    }
+
+    const existeCedula = await Usuario.findOne({ cedula: value.cedula });
+    if (existeCedula) {
+      return res.status(400).json({ error: "La cédula ya está registrada" });
+    }
+
+    const existeTelefono = await Usuario.findOne({ telefono: value.telefono });
+    if (existeTelefono) {
+      return res.status(400).json({ error: "El teléfono ya está registrado" });
+    }
+
+    const hashedPassword = await bcrypt.hash(value.password, 10);
+    const nuevoAdminGeneral = new Usuario({
+      ...value,
+      password: hashedPassword,
+      rol: "admin_general"
+    });
+
+    await nuevoAdminGeneral.save();
+
+    res.status(201).json({
+      success: true,
+      usuario: nuevoAdminGeneral,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "¡Ups! Algo salió mal al intentar registrar el administrador general. Por favor, inténtalo nuevamente más tarde.",
+      error: error.message,
+    });
+  }
+};
+
+
+exports.createUsuario = async (req, res) => {
+  try {
+    const { error, value } = schemaRegisters.validate(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    const existeEmail = await Usuario.findOne({ email: value.email });
+    if (existeEmail) {
+      return res.status(400).json({ error: "El email ya está registrado" });
+      
+    }
+
+    const existeCedula = await Usuario.findOne({ cedula: value.cedula });
+    if (existeCedula) {
+      return res.status(400).json({ error: "La cédula ya está registrada" });
+      
+    }
+
+    const existeTelefono = await Usuario.findOne({ telefono: value.telefono });
+    if (existeTelefono) {
+      return res.status(400).json({ error: "El telefono ya está registrado" });
+    }
+
+    if ((value.rol === 'admin_zonal' || value.rol === 'admin_farmaceutico') && !value.albergue) {
+      return res.status(400).json({ error: "Los roles admin_zonal y admin_farmaceutico requieren un albergue asignado" });
+    }
+
+    const albergue = await Albergue.findById(value.albergue);
+    if (!albergue) {
+      return res.status(400).json({ error: "Albergue no encontrado" });
+    }
+
+    if (albergue.usuarios.length >= albergue.capacidadUsuarios) {
+      return res.status(400).json({ error: "Capacidad máxima de administradores alcanzada en el albergue" });
+    }
+
+    const hashedPassword = await bcrypt.hash(value.password, 10);
+    const nuevoUsuario = new Usuario({
+      ...value,
+      password: hashedPassword,
+    });
+
+    await nuevoUsuario.save();
+
+    if (nuevoUsuario.albergue) {
+      await Albergue.findByIdAndUpdate(
+        nuevoUsuario.albergue,
+        { $push: { usuarios: nuevoUsuario._id } },
+        { new: true, useFindAndModify: false }
+      );
+    }
+
+    res.status(201).json({
+      success: true,
+      usuario: nuevoUsuario,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "¡Ups! Algo salió mal al intentar registrar el usuario. Por favor, inténtalo nuevamente más tarde.",
+      error: error.message,
+    });
+  }
+};
+
+
 exports.createUsuario = async (req, res) => {
   try {
     const { error, value } = schemaRegisters.validate(req.body);
