@@ -171,10 +171,17 @@ exports.createCiudadano = async (req, res) => {
 exports.updateProfileImage = async (req, res) => {
   const { cedula, imgPerfil } = req.body;
 
-  console.log("Recibí una solicitud de actualización de ProfileImage con cédula:", cedula, "e imgPerfil:", imgPerfil);
+  console.log(
+    "Recibí una solicitud de actualización de ProfileImage con cédula:",
+    cedula,
+    "e imgPerfil:",
+    imgPerfil
+  );
 
   if (!cedula || !imgPerfil) {
-    return res.status(400).json({ message: 'Cédula e imagen de perfil son requeridos' });
+    return res
+      .status(400)
+      .json({ message: "Cédula e imagen de perfil son requeridos" });
   }
 
   try {
@@ -185,13 +192,17 @@ exports.updateProfileImage = async (req, res) => {
     );
 
     if (!ciudadano) {
-      return res.status(404).json({ message: 'Ciudadano no encontrado' });
+      return res.status(404).json({ message: "Ciudadano no encontrado" });
     }
 
-    res.status(200).json({ message: 'Imagen de perfil actualizada', ciudadano: ciudadano });
+    res
+      .status(200)
+      .json({ message: "Imagen de perfil actualizada", ciudadano: ciudadano });
   } catch (error) {
     console.error("Error al actualizar la imagen del perfil:", error);
-    res.status(500).json({ message: 'Error interno del servidor', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error interno del servidor", error: error.message });
   }
 };
 
@@ -276,7 +287,10 @@ exports.createCiudadanoUser = async (req, res) => {
 
     await nuevoCiudadano.save();
 
-    const bodegas = await Bodega.find({ albergue: albergueId, categoria: "Medicamentos" });
+    const bodegas = await Bodega.find({
+      albergue: albergueId,
+      categoria: "Medicamentos",
+    });
 
     for (let medicamentoId of medicamentosSeleccionados) {
       const medicamento = await Medicamento.findById(medicamentoId);
@@ -343,12 +357,12 @@ exports.createCiudadanoUser = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "¡Ups! Algo salió mal al intentar registrar al ciudadano. Por favor, inténtelo nuevamente más tarde.",
+      message:
+        "¡Ups! Algo salió mal al intentar registrar al ciudadano. Por favor, inténtelo nuevamente más tarde.",
       error: error.message,
     });
   }
 };
-
 
 exports.getCiudadanos = async (req, res) => {
   try {
@@ -453,8 +467,8 @@ exports.getCiudadanosDeTodosLosAlbergues = async (req, res) => {
         path: "medicamentos",
         select: "nombre",
       })
-      .populate("domicilio", "nombre") 
-      .populate("albergue", "nombre") 
+      .populate("domicilio", "nombre")
+      .populate("albergue", "nombre")
       .lean();
 
     const ciudadanosFormateados = ciudadanos.map((ciudadano) => ({
@@ -476,67 +490,70 @@ exports.getCiudadanosDeTodosLosAlbergues = async (req, res) => {
 exports.scanQrCode = async (req, res) => {
   try {
     const { ciudadanoData } = req.body;
-    const adminId = req.user.id; 
+    const adminId = req.user.id;
 
-    console.log(ciudadanoData)
+    console.log(ciudadanoData);
     const { error } = schemaRegisters.validate(ciudadanoData);
     if (error) {
       return res.status(400).json({ error: error.details[0].message });
     }
 
-    const admin = await Usuario.findById(adminId).populate('albergue');
+    const admin = await Usuario.findById(adminId).populate("albergue");
     if (!admin || !admin.albergue) {
-      return res.status(400).json({ error: "Admin not associated with an albergue" });
+      return res
+        .status(400)
+        .json({ error: "Admin not associated with an albergue" });
     }
 
     let ciudadano = await Ciudadano.findOne({ cedula: ciudadanoData.cedula });
 
-    if (ciudadano) {
-      ciudadano.albergue = admin.albergue._id;
-      await ciudadano.save();
-    } else {
-      ciudadano = new Ciudadano({
-        ...ciudadanoData,
-        albergue: admin.albergue._id,
-        salvaldo: true
-      });
-      await ciudadano.save();
+    if (!ciudadano) {
+      return res.status(404).json({ error: "Ciudadano no encontrado" });
     }
 
-    const bodega = await Bodega.findOne({
-      albergue: admin.albergue._id
-    })
+    ciudadano.albergue = admin.albergue._id;
+    ciudadano.salvaldo = true;
+    await ciudadano.save();
 
-    console.log(bodega)
+    const bodega = await Bodega.findOne({
+      albergue: admin.albergue._id,
+    });
+
+    console.log(bodega);
     const medicamento = await Producto.findOne({
       nombre: ciudadanoData.medicamentos,
-      bodega: bodega._id
-    })
+      bodega: bodega._id,
+    });
 
     if (!medicamento) {
-            return res.status(400).json({ error: "Medication not found in the albergue's warehouse" });
-          }
-      
-          if (medicamento.stockMax <= 0) {
-            return res.status(400).json({ error: "No stock available for the required medication" });
-          }
-      
-          medicamento.stockMax -= 1;
-          await medicamento.save();
+      return res
+        .status(400)
+        .json({ error: "Medication not found in the albergue's warehouse" });
+    }
 
+    if (medicamento.stockMax <= 0) {
+      return res
+        .status(400)
+        .json({ error: "No stock available for the required medication" });
+    }
 
-    res.json({ message: "Citizen successfully updated/added to albergue", ciudadano });
+    medicamento.stockMax -= 1;
+    await medicamento.save();
+
+    res.json({
+      message: "Citizen successfully updated/added to albergue",
+      ciudadano,
+    });
   } catch (error) {
-    console.log('Server error:', error);
+    console.log("Server error:", error);
     res.status(400).json({ error: error.message });
   }
 };
 
-
 // exports.scanQrCode = async (req, res) => {
 //   try {
 //     const { ciudadanoData } = req.body;
-//     const adminId = req.user.id; 
+//     const adminId = req.user.id;
 
 //     console.log(ciudadanoData);
 //     const { error } = schemaRegisters.validate(ciudadanoData);
@@ -565,7 +582,7 @@ exports.scanQrCode = async (req, res) => {
 //     }
 
 //     // Reduce stock of the needed medication
-//     const medicamento = await Producto.findOne({ 
+//     const medicamento = await Producto.findOne({
 //       nombre: ciudadanoData.medicamentos,
 //       bodega: admin.albergue._id
 //     });
