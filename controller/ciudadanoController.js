@@ -15,7 +15,7 @@ const schemaRegisters = Joi.object({
   cedula: Joi.string().min(10).max(10).required(),
   email: Joi.string().min(4).max(100).required().email(),
   telefono: Joi.string().min(10).max(10).required(),
-  enfermedades: Joi.string().optional(),
+  enfermedades: Joi.string().allow("").optional(),
   medicamentos: Joi.alternatives()
     .try(Joi.array().items(Joi.string()), Joi.string())
     .optional(),
@@ -28,9 +28,14 @@ const schemaRegisters = Joi.object({
 
 exports.createCiudadano = async (req, res) => {
   try {
+    if (req.body.enfermedades === "") {
+      delete req.body.enfermedades;
+    }
     // Convertir medicamentos a un array si no lo es
     if (typeof req.body.medicamentos === "string") {
       req.body.medicamentos = [req.body.medicamentos];
+    } else if (!Array.isArray(req.body.medicamentos)) {
+      req.body.medicamentos = [];
     }
 
     const { error, value } = schemaRegisters.validate(req.body);
@@ -61,7 +66,7 @@ exports.createCiudadano = async (req, res) => {
       }
     }
 
-    // Convertir nombres de medicamentos a ObjectIds
+    // Asegurar que medicamentos es un array antes de iterar
     const medicamentosSeleccionados = [];
     for (let medicamentoNombre of value.medicamentos) {
       const medicamento = await Medicamento.findOne({
@@ -492,7 +497,6 @@ exports.scanQrCode = async (req, res) => {
     const { ciudadanoData } = req.body;
     const adminId = req.user.id;
 
-    console.log(ciudadanoData);
     const { error } = schemaRegisters.validate(ciudadanoData);
     if (error) {
       return res.status(400).json({ error: error.details[0].message });
@@ -500,9 +504,7 @@ exports.scanQrCode = async (req, res) => {
 
     const admin = await Usuario.findById(adminId).populate("albergue");
     if (!admin || !admin.albergue) {
-      return res
-        .status(400)
-        .json({ error: "Admin not associated with an albergue" });
+      return res.status(400).json({ error: "Admin not associated with an albergue" });
     }
 
     let ciudadano = await Ciudadano.findOne({ cedula: ciudadanoData.cedula });
@@ -515,33 +517,33 @@ exports.scanQrCode = async (req, res) => {
     ciudadano.salvaldo = true;
     await ciudadano.save();
 
-    const bodega = await Bodega.findOne({
-      albergue: admin.albergue._id,
-    });
-
-    console.log(bodega);
-    const medicamento = await Producto.findOne({
-      nombre: ciudadanoData.medicamentos,
-      bodega: bodega._id,
-    });
-
-    if (!medicamento) {
-      return res
-        .status(400)
-        .json({ error: "Medication not found in the albergue's warehouse" });
+    // Agregar ciudadano al albergue
+    if (!admin.albergue.ciudadanos.includes(ciudadano._id)) {
+      admin.albergue.ciudadanos.push(ciudadano._id);
+      await admin.albergue.save();
     }
 
-    if (medicamento.stockMax <= 0) {
-      return res
-        .status(400)
-        .json({ error: "No stock available for the required medication" });
-    }
+    // Verificar si se requiere medicamento y si existe en la bodega
+    if (ciudadanoData.medicamentos && ciudadanoData.medicamentos.trim() !== '') {
+      const bodega = await Bodega.findOne({
+        albergue: admin.albergue._id,
+      });
 
-    medicamento.stockMax -= 1;
-    await medicamento.save();
+      if (bodega) {
+        const medicamento = await Producto.findOne({
+          nombre: ciudadanoData.medicamentos,
+          bodega: bodega._id,
+        });
+
+        if (medicamento && medicamento.stockMax > 0) {
+          medicamento.stockMax -= 1;
+          await medicamento.save();
+        }
+      }
+    }
 
     res.json({
-      message: "Citizen successfully updated/added to albergue",
+      message: "Ciudadano actualizado/agregado exitosamente al albergue",
       ciudadano,
     });
   } catch (error) {
@@ -549,58 +551,3 @@ exports.scanQrCode = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
-
-// exports.scanQrCode = async (req, res) => {
-//   try {
-//     const { ciudadanoData } = req.body;
-//     const adminId = req.user.id;
-
-//     console.log(ciudadanoData);
-//     const { error } = schemaRegisters.validate(ciudadanoData);
-//     if (error) {
-//       return res.status(400).json({ error: error.details[0].message });
-//     }
-
-//     const admin = await Usuario.findById(adminId).populate('albergue');
-//     if (!admin || !admin.albergue) {
-//       return res.status(400).json({ error: "Admin not associated with an albergue" });
-//     }
-
-//     let ciudadano = await Ciudadano.findOne({ cedula: ciudadanoData.cedula });
-
-//     if (ciudadano) {
-//       ciudadano.albergue = admin.albergue._id;
-//       ciudadano.salvaldo = true;
-//       await ciudadano.save();
-//     } else {
-//       ciudadano = new Ciudadano({
-//         ...ciudadanoData,
-//         albergue: admin.albergue._id,
-//         salvaldo: true
-//       });
-//       await ciudadano.save();
-//     }
-
-//     // Reduce stock of the needed medication
-//     const medicamento = await Producto.findOne({
-//       nombre: ciudadanoData.medicamentos,
-//       bodega: admin.albergue._id
-//     });
-
-//     if (!medicamento) {
-//       return res.status(400).json({ error: "Medication not found in the albergue's warehouse" });
-//     }
-
-//     if (medicamento.stockMax <= 0) {
-//       return res.status(400).json({ error: "No stock available for the required medication" });
-//     }
-
-//     medicamento.stockMax -= 1;
-//     await medicamento.save();
-
-//     res.json({ message: "Citizen successfully updated/added to albergue and medication stock reduced", ciudadano });
-//   } catch (error) {
-//     console.log('Server error:', error);
-//     res.status(400).json({ error: error.message });
-//   }
-// };

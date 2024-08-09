@@ -220,7 +220,7 @@ exports.getTotalAlbergues = async (req, res) => {
 
 exports.getAlbergueIdQR = async (req, res) => {
   try {
-    const url = `${req.protocol}://sistema-cotopaxi-backend.onrender.com/api/albergue/${req.params.id}`;
+    const url = `https://sistema-cotopaxi-backend.onrender.com/api/albergue/${req.params.id}`;
 
     const qrCode = await QRCode.toDataURL(url);
     res.send({ qrCode, url });
@@ -235,10 +235,10 @@ exports.getAlbergueQrView = async (req, res) => {
     if (!albergue) {
       return res.status(404).send("Albergue no encontrado");
     }
-     
+
 
     res.send(`
-      <!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -254,72 +254,77 @@ exports.getAlbergueQrView = async (req, res) => {
       display: flex;
       justify-content: center;
       align-items: center;
-      color: white;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      color: #1F2937; /* Color del texto principal */
     }
     .card {
-      background: rgba(0, 0, 0, 0.75);
+      background: rgba(255, 255, 255, 0.85); /* Fondo blanco semitransparente */
       padding: 30px;
       border-radius: 12px;
       max-width: 600px;
       width: 100%;
-      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.1); /* Sombra sutil para la tarjeta */
       backdrop-filter: blur(10px);
       text-align: center;
+      color: #1F2937; /* Color de texto dentro de la tarjeta: gris oscuro */
     }
     .title {
       font-size: 2.5rem;
       font-weight: bold;
       margin-bottom: 20px;
-      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+      border-bottom: 2px solid rgba(31, 41, 55, 0.2); /* Borde gris oscuro */
       padding-bottom: 10px;
+      color: #2563EB; /* Azul fuerte para el título */
     }
     .info {
       font-size: 1.125rem;
       margin-bottom: 15px;
+      color: #374151; /* Gris mediano para la información */
     }
     .form-group {
       margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px; /* Espacio entre los elementos del formulario */
     }
     .form-input {
-      border: 1px solid #ccc;
+      border: 1px solid #2563EB; /* Borde azul */
       padding: 10px;
       border-radius: 8px;
-      width: calc(100% - 120px);
-      display: inline-block;
-      margin-right: 10px;
-      color:black;
+      width: 100%;
+      color: #1F2937; /* Texto gris oscuro */
+      background-color: #F3F4F6; /* Fondo gris claro */
     }
     .form-button {
-      background-color: #4CAF50;
+      background-color: #10B981; /* Verde esmeralda */
       color: white;
       padding: 10px 20px;
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      transition: background-color 0.3s ease;
     }
     .form-button:hover {
-      background-color: #45a049;
+      background-color: #059669; /* Verde más oscuro */
     }
     .message {
       margin-top: 20px;
-      color: blue;
+      color: #EF4444; /* Rojo brillante para mensajes de error */
     }
-      .styled-link {
-      color: #1d4ed8; /* Azul claro */
-      font-weight: 600; /* Negrita */
-      text-decoration: underline; /* Subrayado */
-      transition: color 0.3s ease, transform 0.3s ease; /* Transición suave */
+    .styled-link {
+      color: #3B82F6; /* Azul claro */
+      font-weight: 600;
+      text-decoration: underline;
+      transition: color 0.3s ease, transform 0.3s ease;
+      margin-top: 20px; /* Separación del enlace */
+      display: inline-block;
     }
-
     .styled-link:hover {
-      color: #1e40af; /* Azul oscuro */
-      transform: scale(1.05); /* Efecto de zoom al pasar el cursor */
+      color: #2563EB; /* Azul fuerte */
+      transform: scale(1.05);
     }
-
     .styled-link:focus {
-      outline: none; /* Elimina el contorno al enfocarse */
-      box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.5); /* Sombra alrededor del enlace al ser enfocado */
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); /* Sombra azul clara */
     }
   </style>
   <script>
@@ -345,24 +350,24 @@ exports.getAlbergueQrView = async (req, res) => {
     <div class="card">
       <h1 class="title">${albergue.nombre}</h1>
       <p class="info">🌍 <span class="font-semibold">Coordenadas:</span> (${albergue.cordenadas_x}, ${albergue.cordenadas_y})</p>
-      <p class="info">👥 <span class="font-semibold">Capacidad de Ciudadanos:</span> ${albergue.capacidadCiudadanos}</p>
-      <p class="info">🏢 <span class="font-semibold">Capacidad de Bodegas:</span> ${albergue.capacidadBodegas}</p>
+      
       <form class="form-group" onsubmit="handleSubmit(event)">
         <input type="text" id="cedula" class="form-input" placeholder="Ingrese su cédula" required />
         <button type="submit" class="form-button">Sumarse al Albergue</button>
       </form>
       <p id="message" class="message"></p>
       <a href="https://cotopaxi-477f5.web.app/formulario" target="_blank" class="styled-link">
-    Si no estás registrado en el sistema, regístrate aquí
-  </a>
-
+        Si no estás registrado en el sistema, regístrate aquí
+      </a>
     </div>
   </div>
 </body>
 </html>
+
+
     `);
 
-    
+
   } catch (error) {
     res.status(500).send({ message: error.message });
   }
