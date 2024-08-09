@@ -83,6 +83,7 @@ exports.getBodegas = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 exports.getBodegaById = async (req, res) => {
   try {
     const bodega = await Bodega.findById(req.params.id).populate('albergue', 'nombre');
