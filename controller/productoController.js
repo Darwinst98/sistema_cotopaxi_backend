@@ -20,7 +20,6 @@ const transferSchema = Joi.object({
   })).required(),
   bodegaDestinoId: Joi.string().required()
 });
-
 exports.transferirProductos = async (req, res) => {
   const { error } = transferSchema.validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
@@ -55,6 +54,9 @@ exports.transferirProductos = async (req, res) => {
       if (productoDestino) {
         // Si el producto ya existe en la bodega de destino, aumentar la cantidad
         productoDestino.stockMin += cantidad;
+        if (productoOrigen.fechaVencimiento) {
+          productoDestino.fechaVencimiento = productoOrigen.fechaVencimiento;
+        }
         await productoDestino.save();
       } else {
         // Si el producto no existe en la bodega de destino, crear uno nuevo
@@ -95,7 +97,6 @@ exports.transferirProductos = async (req, res) => {
     res.status(500).send('Error del servidor.');
   }
 };
-
 
 exports.createProducto = async (req, res) => {
 try {
